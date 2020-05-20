@@ -5,7 +5,7 @@
   command: "php occ app:disable updatenotification"
   args:
     chdir: "{{ webroot }}"
-  when: app_present
+  tags: install_app
 
 - name: "Enable nextcloud ldap authentification"
   become: yes
@@ -13,7 +13,7 @@
   command: "php occ app:enable user_ldap"
   args:
     chdir: "{{ webroot }}"
-  when: app_present
+  tags: install_app
 
 - name: "Create ldap empty config"
   become: yes
@@ -21,19 +21,19 @@
   command: "php occ ldap:create-empty-config"
   args:
     chdir: "{{ webroot }}"
-  when: app_present
+  tags: install_app
 
 - name: "setup nextcloud installation config file"
   template:
     src: "templates/{{ item }}.j2"
     dest: "{{ webroot }}/{{ item }}"
-    owner: "{{ app.instance }}"
+    owner: "{{ app.user }}"
     mode: 0644
   with_items:
     - nc_base_config.json
     - nc_additional_config.json
   notify: remove nextcloud json configs
-  when: app_present
+  tags: install_app
 
 - name: "import nextcloud json configs"
   become: yes
@@ -44,7 +44,7 @@
     - nc_additional_config.json
   args:
     chdir: "{{ webroot }}"
-  when: app_present
+  tags: install_app
 
 - name: "test nextcloud ldap config"
   become: yes
@@ -52,7 +52,7 @@
   command: "php occ ldap:test-config ''"
   args:
     chdir: "{{ webroot }}"
-  when: app_present
+  tags: install_app
 
 - name: "enable external storage"
   become: yes
@@ -60,7 +60,7 @@
   command: "php occ app:enable files_external"
   args:
     chdir: "{{ webroot }}"
-  when: app_present and app.use_user_home_dirs
+  tags: install_app and app.use_user_home_dirs
 
 - name: "configure storage mount"
   become: yes
@@ -69,7 +69,7 @@
   args:
     chdir: "{{ webroot }}"
   register: mount_config
-  when: app_present and app.use_user_home_dirs
+  tags: install_app and app.use_user_home_dirs
 
 - name: "Enable storage mount sharing"
   become: yes
@@ -78,7 +78,7 @@
   args:
     chdir: "{{ webroot }}"
   register: mount_config
-  when: app_present and app.use_user_home_dirs
+  tags: install_app and app.use_user_home_dirs
 
 - name: "Config nextcloud logout URL for yunohost sso"
   blockinfile:
@@ -88,7 +88,7 @@
       // set logout_url according to main domain
       $CONFIG['logout_url'] = 'https://{{ main_domain }}/yunohost/sso/?action=logout';
       //-YunoHost-
-  when: app_present
+  tags: install_app
 
 - name: "Ensure {{ app.instance }} admin is {{ app.admin }}"
   mysql_query:
@@ -101,7 +101,7 @@
       gid: admin
     values:
       uid: "{{ app.admin }}"
-  when: app_present
+  tags: install_app
 
 - name: "Enable storage mount sharing"
   become: yes
@@ -110,7 +110,7 @@
   args:
     chdir: "{{ webroot }}"
   register: mount_config
-  when: app_present and app.use_user_home_dirs
+  tags: install_app and app.use_user_home_dirs
 
   # TODO store checksum in app settings
 
@@ -129,7 +129,7 @@
   command: php occ background:cron
   args:
     chdir: "{{ webroot }}"
-  when: app_present
+  tags: install_app
 
 - name: "Set file ACL for {{ app.instance }} access"
   acl:
@@ -140,4 +140,4 @@
     recursive: yes
     default: yes
     state: present
-  when: app_present and app.use_user_home_dirs
+  tags: install_app and app.use_user_home_dirs

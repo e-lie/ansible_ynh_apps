@@ -3,10 +3,10 @@
 
 - name: stopping php-fpm
   service:
-    name: php7.0-fpm
+    name: php7.3-fpm
     state: stopped
   notify: restart php-fpm
-  when: app_absent
+  tags: remove_app
 
 - name: "ensure groups {{ app.instance }} & multimedia exists"
   group:
@@ -15,11 +15,11 @@
   with_items:
     - multimedia
     - "{{ app.instance }}"
-  when: app_present
+  tags: install_app
 
 - name: "{{ creation }} {{ app.instance }} unix user"
   user:
-    name: "{{ app.instance }}"
+    name: "{{ app.user }}"
     # home dir is necessary to run ansible command with become_user but removed at the end
     create_home: yes
     shell: /usr/bin/nologin
@@ -31,6 +31,6 @@
 
 - name: "remove group {{ app.instance }}"
   group:
-    name: "{{ app.instance }}"
+    name: "{{ app.user }}"
     state: "absent"
-  when: app_absent
+  tags: remove_app

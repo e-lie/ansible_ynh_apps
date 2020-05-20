@@ -1,4 +1,9 @@
 ---
 dependencies:
-  - zauberpony.mysql-query
+    - role: set_vars_ynh
+      vars:
+        app_instance: "{{ app.instance }}"
+    - role: deps_ynh
+      vars:
+        app_instance: "{{ app.instance }}"
 

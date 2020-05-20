@@ -1,6 +1,4 @@
 ---
-- import_tasks: ../../common_actions/required_vars.yml
-
 - name: fetch main domain file
   slurp:
     src: /etc/yunohost/current_host
@@ -14,8 +12,6 @@
 
 - name: register install state variables
   set_fact:
-    app_present: True
-    app_absent: False
     creation: create
     dir_state: directory
   changed_when: False
@@ -24,8 +20,6 @@
 
 - name: register remove state variables
   set_fact:
-    app_present: False
-    app_absent: True
     creation: remove
     dir_state: absent
   changed_when: False

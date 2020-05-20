@@ -3,9 +3,19 @@
 # - import_playbook: known_host_clean.ansible.yml
 
 - hosts: localhost
-  vars_files:
-  - apps_vars.yml
-
   roles:
-    - { role: "{{ apps[0].role }}", app: "{{ apps[0] }}" }
-#    -  { role: "{{ apps[1].role }}", app: "{{ apps[1] }}" }
+    - role: nextcloud_ynh
+      vars:
+        app:
+          instance: nextcloud
+          user: nextcloud
+          role: nextcloud_ynh
+          name: nextcloud
+          state: present
+          domain: devpl.uk
+          admin: elie
+          webpath: /nextcloud
+          use_user_home_dirs: True
+          version: 13.0.6
+
+

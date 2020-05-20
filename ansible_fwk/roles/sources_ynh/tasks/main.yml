@@ -6,7 +6,7 @@
     url: "{{ sources.dl_url }}"
     dest: /tmp/
     checksum: "{{ sources.checksum.type }}:{{ sources.checksum[app.version].value }}"
-  when: app_present
+  tags: install_app
 
 - name: "{{ webroot }} directory {{ creation }}"
   file:
@@ -19,4 +19,4 @@
     dest: "{{ webroot }}"
     remote_src: yes
     extra_opts: [--strip-components=1]
-  when: app_present
+  tags: install_app

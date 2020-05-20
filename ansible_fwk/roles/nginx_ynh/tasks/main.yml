@@ -8,11 +8,11 @@
     owner: root
     mode: 0644
   notify: restart nginx
-  when: app_present
+  tags: install_app
 
 - name: "remove {{ app.instance }} nginx conf removal"
   file:
     path: /etc/nginx/conf.d/{{ app.domain }}.d/{{ app.instance }}.conf
     state: absent
   notify: restart nginx
-  when: app_absent
+  tags: remove_app

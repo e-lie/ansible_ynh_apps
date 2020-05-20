@@ -8,7 +8,7 @@
     owner: root
     mode: 0644
   notify: restart php-fpm
-  when: app_present
+  tags: install_app
 
 - name: "Copy php-fpm ini conf"
   template:
@@ -17,18 +17,18 @@
     owner: root
     mode: 0644
   notify: restart php-fpm
-  when: app_present
+  tags: install_app
 
 - name: "php-fpm conf removal"
   file:
     path: "/etc/php/7.0/fpm/pool.d/{{ app.instance }}.conf"
     state: absent
   notify: restart php-fpm
-  when: app_absent
+  tags: remove_app
 
 - name: "php-fpm ini conf removal"
   file:
     path: /etc/php/7.0/fpm/conf.d/20-{{ app.instance }}.ini
     state: absent
   notify: restart php-fpm
-  when: app_absent
+  tags: remove_app

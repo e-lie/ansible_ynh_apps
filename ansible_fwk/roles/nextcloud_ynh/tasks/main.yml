@@ -16,9 +16,9 @@
 # - import_role:
 #     name: php_fpm_ynh
 
-- name: import mysql
-  import_role:
-    name: mysql_ynh
+# - name: import mysql
+#   import_role:
+#     name: mysql_ynh
 
 # - import_tasks: install_nc.yml
 # - import_tasks: configure_nc.yml

@@ -49,8 +49,8 @@ required_vars:
   - app.webroot
   - app.webpath
 
-  - app_present
-  - app_absent
+  # - app_present
+  # - app_absent
   - datadir
   - dir_state
 
