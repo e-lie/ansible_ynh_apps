@@ -1,0 +1,56 @@
+#app:
+#  name: nextcloud
+#  state: present
+#  instance: nextcloud
+#  webpath: /nextcloud
+#  use_user_home_dirs: True
+
+deps:
+  deps:
+  - php-gd
+  - php-json
+  - php-mcrypt
+  - php-curl
+  - php-apcu
+  - php-redis
+  - php-ldap
+  - php-imagick
+  - acl
+  - php-xml
+  - php-zip
+  ansible_deps:
+  - python-mysqldb
+
+sources:
+  dl_url: "https://download.nextcloud.com/server/releases/nextcloud-{{ app.version }}.tar.bz2"
+  archive_name: "nextcloud-{{ app.version }}.tar.bz2"
+  checksum:
+    type: sha256
+    "13.0.6":
+      value: 90fc9e960b6a477bb14ee87042b3d158bde95c3f0157677cb4547ca7649968d4
+    "13.0.4":
+      value: 18d514145fcddc86f48d0a5fa4a0d4b07617135a1b23107137a6ea3ed519bd54
+
+
+nginx:
+  conf: ../nextcloud_ynh/templates/nginx.conf.j2
+
+php_fpm:
+  pool_conf: ../nextcloud_ynh/templates/php-fpm.conf.j2
+  ini_conf: ../nextcloud_ynh/templates/php-fpm.ini.j2
+
+nextcloud:
+  dav_server: True
+
+
+# vars for current role only (templates included), but not role dependencies
+required_vars:
+  - app.instance
+  - app.webroot
+  - app.webpath
+
+  - app_present
+  - app_absent
+  - datadir
+  - dir_state
+

@@ -1,0 +1,34 @@
+#app:
+#  name: nextcloud
+#  state: present
+#  instance: nextcloud
+#  webpath: /nextcloud
+#  use_user_home_dirs: True
+
+deps:
+  deps: []
+  ansible_deps:
+  - python-mysqldb
+
+sources:
+  dl_url: "https://github.com/ampache/ampache/archive/{{ app.version }}.zip"
+  archive_name: "ampache-{{ app.version }}.zip"
+  checksum:
+    type: sha256
+    "3.8.6":
+      value: 208aca3a8daff6365e6d9d1afad362a80b17abf51114933f962261da2c099c2e
+
+nginx:
+  conf: ../ampache_ynh/templates/nginx.conf.j2
+
+
+# vars for current role only (templates included), but not role dependencies
+required_vars:
+  - app.instance
+  - app.webroot
+  - app.webpath
+
+  - app_present
+  - app_absent
+  - dir_state
+

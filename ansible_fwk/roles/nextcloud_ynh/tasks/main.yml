@@ -1,0 +1,24 @@
+# ---
+# - debug: "msg={{ app }}"
+
+# - import_role:
+#     name: init_check_ynh
+# - import_role:
+#     name: set_vars_ynh
+# - import_role:
+#     name: deps_ynh
+# - import_role:
+#     name: sources_ynh
+# - import_role:
+#     name: nginx_ynh
+# - import_role:
+#     name: unix_user_ynh
+# - import_role:
+#     name: php_fpm_ynh
+
+- name: import mysql
+  import_role:
+    name: mysql_ynh
+
+# - import_tasks: install_nc.yml
+# - import_tasks: configure_nc.yml

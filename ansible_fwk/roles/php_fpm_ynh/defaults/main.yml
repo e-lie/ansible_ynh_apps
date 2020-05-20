@@ -1,0 +1,5 @@
+---
+required_vars:
+  - php_fpm.pool_conf
+  - php_fpm.ini_conf
+  - app.instance

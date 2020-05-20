@@ -1,0 +1,39 @@
+---
+- import_tasks: ../../common_actions/required_vars.yml
+
+- name: fetch main domain file
+  slurp:
+    src: /etc/yunohost/current_host
+  register: current_host
+
+- name: fetch ssowat conf
+  slurp:
+    src: /etc/ssowat/conf.json
+  register: ssowat_conf_fetch
+
+
+- name: register install state variables
+  set_fact:
+    app_present: True
+    app_absent: False
+    creation: create
+    dir_state: directory
+  changed_when: False
+  when: app.state == 'present'
+
+
+- name: register remove state variables
+  set_fact:
+    app_present: False
+    app_absent: True
+    creation: remove
+    dir_state: absent
+  changed_when: False
+  when: app.state == 'absent'
+
+- name: register webroot & datadir & main_domain ansible variables
+  set_fact:
+    datadir: /home/yunohost.app/{{ app.instance }}/data
+    webroot: /var/www/{{ app.instance }}
+    main_domain: "{{ current_host['content'] | b64decode }}"
+  changed_when: False

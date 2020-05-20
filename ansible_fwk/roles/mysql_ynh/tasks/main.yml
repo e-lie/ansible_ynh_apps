@@ -1,0 +1,14 @@
+---
+- import_tasks: ../../common_actions/required_vars.yml
+
+- name: "{{ creation }} {{ app.instance }} database"
+  mysql_db:
+    name: "{{ app.instance }}"
+    state: "{{ app.state }}"
+
+- name: "{{ creation }} {{ app.instance }} mysql user"
+  mysql_user:
+    name: "{{ app.instance }}"
+    password: "{{ lookup('password', '/tmp/' + app.instance + '_passwd chars=ascii_letters') }}"
+    priv: '{{ app.instance }}.*:ALL,GRANT'
+    state: "{{ app.state }}"

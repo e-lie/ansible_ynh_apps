@@ -1,0 +1,36 @@
+---
+- import_tasks: ../../common_actions/required_vars.yml
+
+- name: stopping php-fpm
+  service:
+    name: php7.0-fpm
+    state: stopped
+  notify: restart php-fpm
+  when: app_absent
+
+- name: "ensure groups {{ app.instance }} & multimedia exists"
+  group:
+    name: "{{ item }}"
+    state: "present"
+  with_items:
+    - multimedia
+    - "{{ app.instance }}"
+  when: app_present
+
+- name: "{{ creation }} {{ app.instance }} unix user"
+  user:
+    name: "{{ app.instance }}"
+    # home dir is necessary to run ansible command with become_user but removed at the end
+    create_home: yes
+    shell: /usr/bin/nologin
+    group: '{{ item }}'
+    state: "{{ app.state }}"
+  with_items:
+      - multimedia
+      - "{{ app.instance }}"
+
+- name: "remove group {{ app.instance }}"
+  group:
+    name: "{{ app.instance }}"
+    state: "absent"
+  when: app_absent

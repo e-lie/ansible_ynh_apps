@@ -1,0 +1,20 @@
+yunohost:
+  install_script_url: https://raw.githubusercontent.com/YunoHost/install_script/stretch/install_yunohost
+  domain: devpl.uk
+  extra_domains: ~
+  password: trucmuch
+  ignore_dyndns: False
+  install_certificates: False
+  apps:
+    - label: Dokuwiki # Label is important, it's a reference for the Playbook.
+      link: dokuwiki # It can be the name of an official app or a github link
+      args: # Provide here args. Path and domain are mandatory, other args depend of the app (cf manifest.json of app).
+        path: /dokdok
+        domain: devpl.uk
+        admin: elie
+  users:
+    - name: elie
+      pass: trucmuch
+      firstname: elie
+      lastname: doe
+      mail: elie@devpl.uk

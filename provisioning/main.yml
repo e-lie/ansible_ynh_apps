@@ -1,0 +1,12 @@
+---
+- hosts: devpl
+  remote_user: vagrant
+
+  vars_files:
+  - vars.yml
+
+  roles:
+  - e_lie.ansible_yunohost
+
+  tasks:
+  - import_tasks: customize_debian.yml

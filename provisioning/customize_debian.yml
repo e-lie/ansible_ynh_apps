@@ -1,0 +1,49 @@
+---
+- name: ensure testing present
+  lineinfile:
+    line: "deb http://deb.debian.org/debian buster main"
+    path: /etc/apt/sources.list
+
+- name: add buster apt pinning for ansible
+  blockinfile:
+    path: /etc/apt/preferences
+    create: yes
+    block: |
+      Package: ansible
+      Pin: release a=buster
+      Pin-Priority: 100
+
+- name: ensure recent ansible present
+  apt:
+    name: ansible
+    update_cache: yes
+
+- name: basic dev apps present
+  apt: name={{ item }} state=present
+  with_items:
+  - vim
+  - byobu
+  - zsh
+
+- name: wget grml zsh config
+  get_url:
+    url: https://git.grml.org/f/grml-etc-core/etc/zsh/zshrc
+    dest: /root/.zshrc
+
+- name: change to Zsh
+  command: chsh -s /bin/zsh
+
+- name: get vim config
+  get_url:
+    url: https://framagit.org/e-lie/vim-sewan-juin-2018/raw/master/.vim.zip
+    dest: /root/
+
+- name: get vim config
+  get_url:
+    url: https://framagit.org/e-lie/vim-sewan-juin-2018/raw/master/.vimrc
+    dest: /root/
+
+- name: unzip vim config
+  unarchive:
+    src: /root/.vim.zip
+    dest: /root/

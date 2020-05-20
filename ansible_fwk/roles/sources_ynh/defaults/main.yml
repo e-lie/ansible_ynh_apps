@@ -1,0 +1,6 @@
+---
+required_vars:
+- sources.dl_url
+- sources.archive_name
+- sources.checksum_type
+- sources.checksum_value

@@ -1,0 +1,102 @@
+
+{% if 'nodav' not in app or app['nodav'] == False %}
+location = /.well-known/carddav {
+  return 301 https://$server_name{{ app.webpath }}/remote.php/dav;
+}
+location = /.well-known/caldav {
+  return 301 https://$server_name{{ app.webpath }}/remote.php/dav;
+}
+{% endif %}
+
+location ^~ {{ app.webpath }} {
+  alias {{ webroot }}/;
+
+  if ($scheme = http) {
+    rewrite ^ https://$server_name$request_uri? permanent;
+  }
+
+  # Add headers to serve security related headers
+  add_header Strict-Transport-Security "max-age=15768000;";
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block";
+  add_header X-Robots-Tag none;
+  add_header X-Download-Options noopen;
+  add_header X-Permitted-Cross-Domain-Policies none;
+
+  # Set max upload size
+  client_max_body_size 10G;
+  fastcgi_buffers 64 4K;
+
+  # Extend timeouts
+  client_body_timeout 60m;
+  proxy_read_timeout 60m;
+  fastcgi_read_timeout 60m;
+
+  # Disable gzip to avoid the removal of the ETag header
+  gzip off;
+
+  # Errors pages
+  error_page 403 {{ app.webpath }}/core/templates/403.php;
+  error_page 404 {{ app.webpath }}/core/templates/404.php;
+
+  # The following 2 rules are only needed for the user_webfinger
+  # Uncomment it if you're planning to use this
+  #rewrite ^/.well-known/host-meta {{ app.webpath }}/public.php?service=host-meta last;
+  #rewrite ^/.well-known/host-meta.json {{ app.webpath }}/public.php?service=host-meta-json last;
+
+  location {{ app.webpath }} {
+    rewrite ^ {{ app.webpath }}/index.php$request_uri;
+  }
+
+  location = {{ app.webpath }}/robots.txt {
+    allow all;
+    log_not_found off;
+    access_log off;
+  }
+
+  location ~ ^{{ app.webpath }}/(?:build|tests|config|lib|3rdparty|templates|data)/ {
+    deny all;
+  }
+  location ~ ^{{ app.webpath }}/(?:\.|autotest|occ|issue|indie|db_|console) {
+    deny all;
+  }
+
+  location ~ ^{{ app.webpath }}/(?:index|remote|public|cron|core/ajax/update|status|ocs/v[12]|updater/.+|ocs-provider/.+|core/templates/40[34])\.php(?:$|/) {
+    include fastcgi_params;
+    fastcgi_split_path_info ^(.+\.php)(/.+)$;
+    fastcgi_param SCRIPT_FILENAME $request_filename;
+    fastcgi_param PATH_INFO $fastcgi_path_info;
+    fastcgi_param HTTPS on;
+    fastcgi_param modHeadersAvailable true;
+    fastcgi_param REMOTE_USER $remote_user;
+    fastcgi_pass unix:/var/run/php5-fpm-{{ app.instance }}.sock;
+    fastcgi_intercept_errors on;
+  }
+
+  location ~ ^{{ app.webpath }}/(?:updater|ocs-provider)(?:$|/) {
+    try_files $uri/ =404;
+    index index.php;
+  }
+
+  # Adding the cache control header for js and css files
+  location ~* \.(?:css|js)$ {
+    add_header Cache-Control "public, max-age=7200";
+    # Add headers to serve security related headers
+    add_header Strict-Transport-Security "max-age=15768000;";
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
+    add_header X-Robots-Tag none;
+    add_header X-Download-Options noopen;
+    add_header X-Permitted-Cross-Domain-Policies none;
+    # Optional: Don't log access to assets
+    access_log off;
+  }
+
+  location ~* \.(?:svg|gif|png|html|ttf|woff|ico|jpg|jpeg)$ {
+    # Optional: Don't log access to other assets
+    access_log off;
+  }
+
+  # show YunoHost panel access
+  include conf.d/yunohost_panel.conf.inc;
+}

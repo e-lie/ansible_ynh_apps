@@ -1,0 +1,5 @@
+---
+required_vars:
+ - app_present
+ - deps.deps
+ - deps.ansible_deps

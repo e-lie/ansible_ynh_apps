@@ -1,0 +1,8 @@
+---
+- name: remove nextcloud json configs
+  file:
+    path: "{{ webroot }}/{{ item }}"
+    state: absent
+  with_items:
+    - nc_base_config.json
+    - nc_additional_config.json

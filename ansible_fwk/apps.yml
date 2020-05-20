@@ -1,0 +1,11 @@
+#!/usr/bin/env ansible-playbook
+
+# - import_playbook: known_host_clean.ansible.yml
+
+- hosts: localhost
+  vars_files:
+  - apps_vars.yml
+
+  roles:
+    - { role: "{{ apps[0].role }}", app: "{{ apps[0] }}" }
+#    -  { role: "{{ apps[1].role }}", app: "{{ apps[1] }}" }

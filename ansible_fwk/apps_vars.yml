@@ -1,0 +1,33 @@
+
+
+
+apps:
+ - instance: nextcloud
+   role: nextcloud_ynh
+   state: present
+   domain: devpl.uk
+   admin: elie
+   webpath: /nextcloud
+   name: nextcloud
+   use_user_home_dirs: True
+   version: 13.0.6
+
+  # - instance: ampache
+  #   role: ampache_ynh
+  #   state: present
+  #   domain: dopl.uk
+  #   admin: elie
+  #   webpath: /ampache
+  #   name: ampache
+  #   version: 3.8.6
+  #
+  # - instance: nextcloud__2
+  #   role: nextcloud_ynh
+  #   state: present
+  #   domain: dopl.uk
+  #   admin: elie
+  #   webpath: /nextclouuuuud
+  #   name: nextcloud
+  #   use_user_home_dirs: False
+  #   nodav: True
+  #   version: 13.0.4

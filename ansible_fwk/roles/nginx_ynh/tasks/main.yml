@@ -1,0 +1,18 @@
+---
+- import_tasks: ../../common_actions/required_vars.yml
+
+- name: "setup {{ app.instance }} nginx conf"
+  template:
+    src: "{{ nginx.conf }}"
+    dest: /etc/nginx/conf.d/{{ app.domain }}.d/{{ app.instance }}.conf
+    owner: root
+    mode: 0644
+  notify: restart nginx
+  when: app_present
+
+- name: "remove {{ app.instance }} nginx conf removal"
+  file:
+    path: /etc/nginx/conf.d/{{ app.domain }}.d/{{ app.instance }}.conf
+    state: absent
+  notify: restart nginx
+  when: app_absent

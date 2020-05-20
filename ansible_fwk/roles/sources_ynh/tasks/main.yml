@@ -1,0 +1,22 @@
+---
+- import_tasks: ../../common_actions/required_vars.yml
+
+- name: Download {{ app.instance }} archive with integrity check
+  get_url:
+    url: "{{ sources.dl_url }}"
+    dest: /tmp/
+    checksum: "{{ sources.checksum.type }}:{{ sources.checksum[app.version].value }}"
+  when: app_present
+
+- name: "{{ webroot }} directory {{ creation }}"
+  file:
+    path: "{{ webroot }}"
+    state: "{{ dir_state }}"
+
+- name: "extract archive to {{ webroot }}"
+  unarchive:
+    src:  /tmp/{{ sources.archive_name }}
+    dest: "{{ webroot }}"
+    remote_src: yes
+    extra_opts: [--strip-components=1]
+  when: app_present

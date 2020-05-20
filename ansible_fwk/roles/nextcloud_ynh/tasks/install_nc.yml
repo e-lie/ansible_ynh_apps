@@ -1,0 +1,37 @@
+---
+- debug: "msg={{ app }}"
+
+- name: "Create nextcloud yunohost datadir"
+  file:
+    path: "{{ datadir }}"
+    owner: "{{ app.instance }}"
+    group: "{{ app.instance }}"
+    state: "{{ dir_state }}"
+    mode: 0755
+
+- name: "Set temporary permissions for command line installation."
+  file:
+    path: "{{ webroot }}"
+    state: directory
+    recurse: yes
+    owner: "{{ app.instance }}"
+    group: "{{ app.instance }}"
+  when: app_present
+
+- name: "Run nextcloud occ installation command"
+  become: yes
+  become_user: "{{ app.instance }}"
+  command: >
+      php occ maintenance:install
+      --database="mysql"
+      --database-host=localhost
+      --database-name={{ app.instance }}
+      --database-user={{ app.instance }}
+      --database-pass="{{ lookup('password', '/tmp/' + app.instance + '_passwd chars=ascii_letters') }}"
+      --admin-user=admin
+      --admin-pass="{{ lookup('password', '/tmp/nc_admin_passwd chars=ascii_letters') }}"
+      --data-dir={{ datadir }}
+  args:
+    chdir: "{{ webroot }}"
+    creates: "{{ webroot }}/config/config.php"
+  when: app_present

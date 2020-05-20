@@ -1,0 +1,143 @@
+---
+- name: "Ensure that UpdateNotification is disabled"
+  become: yes
+  become_user: "{{ app.instance }}"
+  command: "php occ app:disable updatenotification"
+  args:
+    chdir: "{{ webroot }}"
+  when: app_present
+
+- name: "Enable nextcloud ldap authentification"
+  become: yes
+  become_user: "{{ app.instance }}"
+  command: "php occ app:enable user_ldap"
+  args:
+    chdir: "{{ webroot }}"
+  when: app_present
+
+- name: "Create ldap empty config"
+  become: yes
+  become_user: "{{ app.instance }}"
+  command: "php occ ldap:create-empty-config"
+  args:
+    chdir: "{{ webroot }}"
+  when: app_present
+
+- name: "setup nextcloud installation config file"
+  template:
+    src: "templates/{{ item }}.j2"
+    dest: "{{ webroot }}/{{ item }}"
+    owner: "{{ app.instance }}"
+    mode: 0644
+  with_items:
+    - nc_base_config.json
+    - nc_additional_config.json
+  notify: remove nextcloud json configs
+  when: app_present
+
+- name: "import nextcloud json configs"
+  become: yes
+  become_user: "{{ app.instance }}"
+  command: 'php occ config:import "{{ webroot }}/{{ item }}"'
+  with_items:
+    - nc_base_config.json
+    - nc_additional_config.json
+  args:
+    chdir: "{{ webroot }}"
+  when: app_present
+
+- name: "test nextcloud ldap config"
+  become: yes
+  become_user: "{{ app.instance }}"
+  command: "php occ ldap:test-config ''"
+  args:
+    chdir: "{{ webroot }}"
+  when: app_present
+
+- name: "enable external storage"
+  become: yes
+  become_user: "{{ app.instance }}"
+  command: "php occ app:enable files_external"
+  args:
+    chdir: "{{ webroot }}"
+  when: app_present and app.use_user_home_dirs
+
+- name: "configure storage mount"
+  become: yes
+  become_user: "{{ app.instance }}"
+  command: php occ files_external:create --output=json "Home" 'local' 'null::null' -c "datadir={{ datadir }}"
+  args:
+    chdir: "{{ webroot }}"
+  register: mount_config
+  when: app_present and app.use_user_home_dirs
+
+- name: "Enable storage mount sharing"
+  become: yes
+  become_user: "{{ app.instance }}"
+  command: php occ files_external:option "{{ mount_config.stdout }}" enable_sharing true
+  args:
+    chdir: "{{ webroot }}"
+  register: mount_config
+  when: app_present and app.use_user_home_dirs
+
+- name: "Config nextcloud logout URL for yunohost sso"
+  blockinfile:
+    path: /etc/network/interfaces
+    block: |
+      //-YunoHost-
+      // set logout_url according to main domain
+      $CONFIG['logout_url'] = 'https://{{ main_domain }}/yunohost/sso/?action=logout';
+      //-YunoHost-
+  when: app_present
+
+- name: "Ensure {{ app.instance }} admin is {{ app.admin }}"
+  mysql_query:
+    name: "{{ app.instance }}"
+    table: oc_group_user
+    login_host: localhost
+    login_user: "{{ app.instance }}"
+    login_password: "{{ lookup('password', '/tmp/' + app.instance + '_passwd chars=ascii_letters') }}"
+    identifiers:
+      gid: admin
+    values:
+      uid: "{{ app.admin }}"
+  when: app_present
+
+- name: "Enable storage mount sharing"
+  become: yes
+  become_user: "{{ app.instance }}"
+  command: php occ user:delete admin
+  args:
+    chdir: "{{ webroot }}"
+  register: mount_config
+  when: app_present and app.use_user_home_dirs
+
+  # TODO store checksum in app settings
+
+
+- name: "Setup {{ app.instance }} cronjob"
+  cron:
+    name: "check dirs"
+    minute: "15"
+    job: "/usr/bin/php -f {{ webroot }}/cron.php"
+    user:  "{{ app.instance }}"
+    cron_file: "{{ app.instance }}.cron"
+
+- name: "Enable storage mount sharing"
+  become: yes
+  become_user: "{{ app.instance }}"
+  command: php occ background:cron
+  args:
+    chdir: "{{ webroot }}"
+  when: app_present
+
+- name: "Set file ACL for {{ app.instance }} access"
+  acl:
+    path: "/home/{{ app.instance }}"
+    entity: "{{ app.instance }}"
+    etype: group
+    permissions: rwx
+    recursive: yes
+    default: yes
+    state: present
+  when: app_present and app.use_user_home_dirs

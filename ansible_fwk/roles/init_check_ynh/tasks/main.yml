@@ -1,0 +1,22 @@
+---
+- import_tasks: ../../common_actions/required_vars.yml
+
+- name: Check web path available
+  command: "yunohost domain url-available {{ app.domain }} {{ app.webpath }}"
+  register: url_available
+  changed_when: False
+
+- name: Check that webroot doesn't exist
+  stat:
+    path: "/var/www/{{ app.instance }}"
+  register: webroot_check
+
+- name: set variable url_available
+  set_fact:
+    url_available: "{{ url_available.stdout }}"
+  when: url_available is defined
+
+
+
+
+# should add check that app.instance is available and that everything is clean (datadir, webroot, db doesn't exists)

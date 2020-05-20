@@ -1,0 +1,4 @@
+---
+required_vars:
+ - app.instance
+ - app.state
