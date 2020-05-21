@@ -3,11 +3,14 @@
   slurp:
     src: /etc/yunohost/current_host
   register: current_host
+  tags: install_app, remove_app
 
 - name: fetch ssowat conf
   slurp:
     src: /etc/ssowat/conf.json
   register: ssowat_conf_fetch
+  tags: install_app, remove_app
+
 
 
 - name: register install state variables
@@ -15,7 +18,9 @@
     creation: create
     dir_state: directory
   changed_when: False
-  when: app.state == 'present'
+  # when: app.state == 'present'
+  tags: install_app
+
 
 
 - name: register remove state variables
@@ -23,7 +28,9 @@
     creation: remove
     dir_state: absent
   changed_when: False
-  when: app.state == 'absent'
+  # when: app.state == 'absent'
+  tags: remove_app
+
 
 - name: register webroot & datadir & main_domain ansible variables
   set_fact:
@@ -31,3 +38,4 @@
     webroot: /var/www/{{ app.instance }}
     main_domain: "{{ current_host['content'] | b64decode }}"
   changed_when: False
+  tags: install_app, remove_app

@@ -3,6 +3,8 @@
 # - import_playbook: known_host_clean.ansible.yml
 
 - hosts: localhost
+  # become: yes
+  gather_facts: yes
   roles:
     - role: nextcloud_ynh
       vars:

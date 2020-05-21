@@ -1,0 +1,6 @@
+---
+dependencies:
+
+    - role: set_vars_ynh
+      vars:
+        app_instance: "{{ app.instance }}"

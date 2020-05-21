@@ -9,7 +9,6 @@ deps:
   deps:
   - php-gd
   - php-json
-  - php-mcrypt
   - php-curl
   - php-apcu
   - php-redis

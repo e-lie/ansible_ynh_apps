@@ -1,2 +1,4 @@
 [masters]
-ynh-do ansible_host=localhost ansible_user=root
+ynh-do ansible_host=ynh ansible_connection=lxd
+
+# ansible_user=root ansible_password=trucmuch42

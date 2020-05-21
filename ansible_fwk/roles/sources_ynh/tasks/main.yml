@@ -12,6 +12,7 @@
   file:
     path: "{{ webroot }}"
     state: "{{ dir_state }}"
+  tags: install_app, remove_app
 
 - name: "extract archive to {{ webroot }}"
   unarchive:

@@ -12,4 +12,5 @@
   apt:
     name: "{{ item }}"
     state: present
+  tags: install_app
   with_items: "{{ deps.ansible_deps }}"

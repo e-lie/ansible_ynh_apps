@@ -1,9 +1,11 @@
 ---
 dependencies:
-    - role: set_vars_ynh
+
+    - role: deps_ynh
       vars:
         app_instance: "{{ app.instance }}"
-    - role: deps_ynh
+        
+    - role: sources_ynh
       vars:
         app_instance: "{{ app.instance }}"
 
