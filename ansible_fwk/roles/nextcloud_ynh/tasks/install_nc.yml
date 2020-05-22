@@ -19,10 +19,8 @@
   tags: install_app
 
 - name: "Run nextcloud occ installation command"
-  become: yes
-  become_user: "{{ app.instance }}"
-  command: >
-      php occ maintenance:install
+  shell: >
+      {{ exec_occ }} maintenance:install
       --database="mysql"
       --database-host=localhost
       --database-name={{ app.instance }}
@@ -32,6 +30,5 @@
       --admin-pass="{{ lookup('password', '/tmp/nc_admin_passwd chars=ascii_letters') }}"
       --data-dir={{ datadir }}
   args:
-    chdir: "{{ webroot }}"
     creates: "{{ webroot }}/config/config.php"
   tags: install_app

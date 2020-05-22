@@ -1,94 +1,51 @@
 ---
 
-# - set_vars:
-#     exec_occ: |
-#       cd {{ webroot }}
-#       sudo -u {{ app.user }} \
-#       {{ app.phpversion }} occ \
-#       --no-interaction --no-ansi
+- name: "Disable update notification"
+  shell: "{{ exec_occ }} app:disable updatenotification"
+  tags: install_app
 
-# - name: "Ensure that UpdateNotification is disabled"
-#   shell: "{{ exec_occ }} app:disable updatenotification"
+- name: "Enable ldap auth plugin"
+  shell: "{{ exec_occ }} app:enable user_ldap"
+  tags: install_app
 
-# ------------------------------------
+- name: "Ensure that UpdateNotification is disabled"
+  shell: "{{ exec_occ }} ldap:create-empty-config"
+  tags: install_app
 
-# - block:
-#   become: yes
-#   become_user: "{{ app.user }}"
-#   tags: install_app
-
-#   - name: "Ensure that UpdateNotification is disabled"
-#     shell: php occ app:disable updatenotification
-#     args: chdir={{ webroot }}
-
-#   - name: "Ensure that UpdateNotification is disabled"
-#     shell: php occ app:enable user_ldap
-#     args: chdir={{ webroot }}
-
-#   - name: "Ensure that UpdateNotification is disabled"
-#     shell: php occ ldap:create-empty-config"
-#     args: chdir={{ webroot }}
-    
-    
-
-
-- block:
-
-  - name: "setup nextcloud installation config file"
-    template:
-      src: "templates/{{ item }}.j2"
-      dest: "{{ webroot }}/{{ item }}"
-      owner: "{{ app.user }}"
-      mode: 0644
-    notify: remove nextcloud json configs
-    tags: install_app
-
-  - name: "import nextcloud json configs"
-    become: yes
-    become_user: "{{ app.instance }}"
-    shell: 'php occ config:import "{{ webroot }}/{{ item }}"'
-    args:
-      chdir: "{{ webroot }}"
-    tags: install_app
-
+- name: "setup nextcloud installation config file"
+  template:
+    src: "templates/{{ item }}.j2"
+    dest: "{{ webroot }}/{{ item }}"
+    owner: "{{ app.user }}"
+    mode: 0644
+  notify: remove nextcloud json configs
+  tags: install_app
   loop:
-    - nc_base_config.json
-    - nc_additional_config.json
+  - nc_base_config.json
+  - nc_additional_config.json
 
-- name: "test nextcloud ldap config"
-  become: yes
-  become_user: "{{ app.instance }}"
-  command: "php occ ldap:test-config ''"
-  args:
-    chdir: "{{ webroot }}"
+- name: "import nextcloud json configs"
+  shell: '{{ exec_occ }} config:import "{{ webroot }}/{{ item }}"'
+  loop:
+  - nc_base_config.json
+  - nc_additional_config.json
+
+- name: "Test ldap config"
+  shell: "{{ exec_occ }} ldap:test-config ''" 
   tags: install_app
 
 - block:
-  become: yes
-  become_user: "{{ app.instance }}"
-
   - name: "enable external storage"
     command: "php occ app:enable files_external"
-    args:
-      chdir: "{{ webroot }}"
     tags: install_app
 
   - name: "configure storage mount"
-    become: yes
-    become_user: "{{ app.instance }}"
     command: php occ files_external:create --output=json "Home" 'local' 'null::null' -c "datadir={{ datadir }}"
-    args:
-      chdir: "{{ webroot }}"
     register: mount_config
     tags: install_app
 
   - name: "Enable storage mount sharing"
-    become: yes
-    become_user: "{{ app.instance }}"
     command: php occ files_external:option "{{ mount_config.stdout }}" enable_sharing true
-    args:
-      chdir: "{{ webroot }}"
-    register: mount_config
     tags: install_app
 
   when: app.use_user_home_dirs
@@ -117,12 +74,7 @@
   tags: install_app
 
 - name: "Enable storage mount sharing"
-  become: yes
-  become_user: "{{ app.instance }}"
   command: php occ user:delete admin
-  args:
-    chdir: "{{ webroot }}"
-  register: mount_config
   tags: install_app and app.use_user_home_dirs
 
   # TODO store checksum in app settings
@@ -136,11 +88,7 @@
     cron_file: "{{ app.instance }}.cron"
 
 - name: "Enable storage mount sharing"
-  become: yes
-  become_user: "{{ app.instance }}"
   command: php occ background:cron
-  args:
-    chdir: "{{ webroot }}"
   tags: install_app
 
 - name: "Set file ACL for {{ app.instance }} access"

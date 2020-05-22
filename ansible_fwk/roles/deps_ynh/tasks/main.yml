@@ -3,14 +3,12 @@
 
 - name: Ensure nextcloud dependencies are present
   apt:
-    name: "{{ item }}"
+    name: "{{ deps.deps }}"
     state: present
   tags: install_app
-  with_items: "{{ deps.deps }}"
 
 - name: Ensure ansible dependencies for mysql are present
   apt:
-    name: "{{ item }}"
+    name: "{{ deps.ansible_deps }}"
     state: present
   tags: install_app
-  with_items: "{{ deps.ansible_deps }}"

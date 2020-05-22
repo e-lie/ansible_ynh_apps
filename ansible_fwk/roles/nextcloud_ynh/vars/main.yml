@@ -1,0 +1,5 @@
+exec_occ: |
+  cd {{ webroot }}
+  sudo -u {{ app.user }} \
+  {{ app.phpversion }} occ \
+  --no-interaction --no-ansi
